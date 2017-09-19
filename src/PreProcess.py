@@ -15,7 +15,8 @@ def build_multiturn_data(trainfile, max_len = 100,isshuffle=False):
     vocab = defaultdict(float)
     total = 1
     with codecs.open(trainfile,'r','utf-8') as f:
-        for line in f:
+        for line_num, line in enumerate(f):
+            if line_num > 1000: break
             line = line.replace("_","")
             parts = line.strip().split("\t")
 
@@ -119,9 +120,9 @@ class WordVecs(object):
 
 def createtopicvec():
     max_topicword = 50
-    model = Word2Vec.load_word2vec_format(r"\\msra-sandvm-001\v-wuyu\Models\W2V\Ubuntu\word2vec.model")
+    model = Word2Vec.load_word2vec_format(r"./word2vec.model")
     topicmatrix = np.zeros(shape=(100,max_topicword,100),dtype=theano.config.floatX)
-    file = open(r"\\msra-sandvm-001\v-wuyu\project\pythonproject\ACL2016\mergedic2.txt")
+    file = open(r"./mergedic2.txt")
     i = 0
     miss = 0
     for line in file:
@@ -138,16 +139,16 @@ def createtopicvec():
 
 def ParseSingleTurn():
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-    revs, vocab, max_len = build_data(r"\\msra-sandvm-001\v-wuyu\Data\ubuntu_data\ubuntu_data\train.topic",isshuffle=True)
-    word2vec = WordVecs(r"\\msra-sandvm-001\v-wuyu\Models\W2V\Ubuntu\word2vec.model", vocab, True, True)
+    revs, vocab, max_len = build_data(r"./train.topic",isshuffle=True)
+    word2vec = WordVecs(r"./word2vec.model", vocab, True, True)
     cPickle.dump([revs, word2vec, max_len,createtopicvec()], open("ubuntu_data.test",'wb'))
     logger.info("dataset created!")
 
 def ParseMultiTurn():
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-    revs, vocab, max_len = build_multiturn_data(r"\\msra-sandvm-001\v-wuyu\Data\ubuntu_data\ubuntu_data\test.txt",isshuffle=False)
-    word2vec = WordVecs(r"\\msra-sandvm-001\v-wuyu\Models\W2V\Ubuntu\word2vec.model", vocab, True, True)
-    cPickle.dump([revs, word2vec, max_len], open("ubuntu_data.mul.test",'wb'))
+    revs, vocab, max_len = build_multiturn_data(r"./train.txt",isshuffle=False)
+    word2vec = WordVecs(r"./word2vec.model", vocab, True, True)
+    cPickle.dump([revs, word2vec, max_len], open("ubuntu_data.mul.train",'wb'))
     logger.info("dataset created!")
 
 if __name__=="__main__":

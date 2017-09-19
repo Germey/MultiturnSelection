@@ -7,6 +7,7 @@ import datetime
 import theano
 import theano.tensor as T
 from theano.tensor.nnet import conv
+from theano.tensor.nnet import conv2d
 
 def ReLU(x):
     y = T.maximum(0.0, x)
@@ -71,8 +72,8 @@ class QALeNetConvPoolLayer(object):
         self.b = theano.shared(value=b_values, borrow=True, name="b_conv")
 
         # convolve input feature maps with filters
-        lconv_out = conv.conv2d(input=linp, filters=self.W, filter_shape = filter_shape)
-        rconv_out = conv.conv2d(input=rinp, filters=self.W, filter_shape = filter_shape)
+        lconv_out = conv2d(input=linp, filters=self.W, filter_shape = filter_shape)
+        rconv_out = conv2d(input=rinp, filters=self.W, filter_shape = filter_shape)
         self.lconv_out_tanh = ReLU(lconv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
         self.rconv_out_tanh = ReLU(rconv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
         self.loutput = theano.tensor.signal.pool.pool_2d(input=self.lconv_out_tanh, ds=self.poolsize, ignore_border=True, mode="max")
@@ -83,8 +84,8 @@ class QALeNetConvPoolLayer(object):
         """
         predict for new data
         """
-        lconv_out = conv.conv2d(input=lnew_data, filters=self.W)
-        rconv_out = conv.conv2d(input=rnew_data, filters=self.W)
+        lconv_out = conv2d(input=lnew_data, filters=self.W)
+        rconv_out = conv2d(input=rnew_data, filters=self.W)
         lconv_out_tanh = T.tanh(lconv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
         rconv_out_tanh = T.tanh(rconv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
         loutput = theano.tensor.signal.pool.pool_2d(input=lconv_out_tanh, ds=self.poolsize, ignore_border=True, mode="max")
@@ -142,7 +143,7 @@ class LeNetConvPoolLayer(object):
         self.b = theano.shared(value=b_values, borrow=True, name="b_conv")
 
         # convolve input feature maps with filters
-        conv_out = conv.conv2d(input=input, filters=self.W,filter_shape=self.filter_shape, image_shape=self.image_shape)
+        conv_out = conv2d(input=input, filters=self.W,filter_shape=self.filter_shape, image_shape=self.image_shape)
         if self.non_linear=="tanh":
             conv_out_tanh = T.tanh(conv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
             self.output = theano.tensor.signal.pool.pool_2d(input=conv_out_tanh, ds=self.poolsize, ignore_border=True,mode="max")
@@ -159,7 +160,7 @@ class LeNetConvPoolLayer(object):
         predict for new data
         """
         img_shape = (batch_size, 1, self.image_shape[2], self.image_shape[3])
-        conv_out = conv.conv2d(input=new_data, filters=self.W, filter_shape=self.filter_shape, image_shape=img_shape)
+        conv_out = conv2d(input=new_data, filters=self.W, filter_shape=self.filter_shape, image_shape=img_shape)
         if self.non_linear=="tanh":
             conv_out_tanh = T.tanh(conv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
             output = theano.tensor.signal.pool.pool_2d(input=conv_out_tanh, ds=self.poolsize, ignore_border=True)
@@ -224,7 +225,7 @@ class LeNetConvPoolLayer2(object):
 
 
     def __call__(self, input):
-        conv_out = conv.conv2d(input=input, filters=self.W,filter_shape=self.filter_shape, image_shape=self.image_shape)
+        conv_out = conv2d(input=input, filters=self.W,filter_shape=self.filter_shape, image_shape=self.image_shape)
         if self.non_linear=="tanh":
             conv_out_tanh = T.tanh(conv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
             self.output = theano.tensor.signal.pool.pool_2d(input=conv_out_tanh, ds=self.poolsize, ignore_border=True,mode="max")
@@ -242,7 +243,7 @@ class LeNetConvPoolLayer2(object):
         predict for new data
         """
         img_shape = (batch_size, 1, self.image_shape[2], self.image_shape[3])
-        conv_out = conv.conv2d(input=new_data, filters=self.W, filter_shape=self.filter_shape, image_shape=img_shape)
+        conv_out = conv2d(input=new_data, filters=self.W, filter_shape=self.filter_shape, image_shape=img_shape)
         if self.non_linear=="tanh":
             conv_out_tanh = T.tanh(conv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
             output = theano.tensor.signal.pool.pool_2d(input=conv_out_tanh, ds=self.poolsize, ignore_border=True)

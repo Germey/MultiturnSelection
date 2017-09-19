@@ -2,13 +2,14 @@ import cPickle
 from RNN import GRU
 import numpy as np
 import theano
+theano.config.floatX= 'float32'
+
 from gensim.models.word2vec import Word2Vec
 from PreProcess import WordVecs
 from Classifier import LogisticRegression
 from Optimization import Adam
 import theano.tensor as T
 from SimAsImage import ConvSim
-
 max_turn = 10
 def get_idx_from_sent_msg(sents, word_idx_map, max_l=50,mask = False):
     """
@@ -219,7 +220,7 @@ def load_params(params,filename):
 
 def train(datasets,
         U,                       # pre-trained word embeddings
-        n_epochs=5,batch_size=20,max_l = 100,hidden_size=100,word_embedding_size=100,
+        n_epochs=15,batch_size=20,max_l = 100,hidden_size=100,word_embedding_size=100,
         session_hidden_size=50,session_input_size =50, model_name = 'SMN_last.bin'):
     hiddensize = hidden_size
     U = U.astype(dtype=theano.config.floatX)
@@ -252,6 +253,7 @@ def train(datasets,
     q_embedding = []
     offset = 2 * lsize
     for i in range(max_turn):
+        print i, len(train_set)
         train_set_lx.append(theano.shared(np.asarray(train_set[:,offset*i:offset*i + lsize]
                                                    ,dtype=theano.config.floatX),borrow=True))
         train_set_lx_mask.append(theano.shared(np.asarray(train_set[:,offset*i + lsize:offset*i + 2*lsize]
@@ -408,9 +410,10 @@ def make_data(revs, word_idx_map, max_l=50, filter_h=3, val_test_splits=[2,3],va
 if __name__=="__main__":
     train_flag = True
     max_word_per_utterence = 50
-    dataset = r"../ubuntu_data.mul.100d.fullw2v.train"
+    dataset = r"./ubuntu_data.mul.train"
     x = cPickle.load(open(dataset,"rb"))
-    revs, wordvecs, max_l = x[0], x[1], x[2]
+    revs, wordvecs, max_l = x[0], x[1], x[2] 
+    print(len(revs))
 
     if train_flag == False:
         x = cPickle.load(open(r"../ubuntu_data.mul.test","rb"))
